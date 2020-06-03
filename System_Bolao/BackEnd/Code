@@ -1,0 +1,241 @@
+'-- All the code used for this project. 
+
+'-- FRM_LOGIN
+Private Sub Form_Load()
+
+txt_usuario.Setfocus
+
+End Sub
+
+Private Sub btn_sair_Click()
+
+If MsgBox ("Você deseja sair do sistema?", vbInformation + vbYesNo) = vbYes Then
+    DoCmd.Quit
+End If
+
+End Sub
+
+Private Sub btn_entrar_Click()
+
+Set Rs = CurrentDb.OpenRecordset("Select * From TBL_USUARIOS Where Login = '" & txt_usuario & "' and Senha = '" & txt_senha & "'")
+    If Not Rs.EOF Then
+        If txt_senha = "" Or IsNull(txt_senha) Then
+            MsgBox "Informe a senha para ter acesso ao sistema!",vbInformation,"Atenção"
+        ElseIf txt_senha = Rs("Senha") Then
+            DoCmd.Close acForm, Me.Name
+            DoCmd.OpenForm "FRM_MENU_PRINCIPAL"
+        Else
+            MsgBox "Usuário e senha não correspondem, tente novamente!",vbInformation,"Atenção - Login"
+            txt_usuario = Empty
+            txt_senha =Empty
+            txt_usuario.Setfocus
+        End If
+    Else
+        MsgBox "Usuário não possui cadastro para acessar o sistema, solicite para o responsável!",vbInformation,"Atenção - Login"
+    End If
+Rs.Close
+Set Rs = Nothing
+
+End Sub
+
+'-- FRM_MENU_PRINCIPAL
+
+Private Form_Load()
+
+Me.txt_usuario = DlookupRecordset("Select NOME_USUARIO From TBL_USUARIOS Where Login = '" & Form_FRM_LOGIN.txt_usuario & "'")
+
+End Sub
+
+Private Sub btn_cad_apostas_Click()
+
+DoCmd.Close acForm, Me.Name
+DoCmd.OpenForm "FRM_APOSTAS"
+
+End Sub
+
+Private Sub btn_cad_selecoes_Click()
+
+DoCmd.Close acForm, Me.Name
+DoCmd.OpenForm "FRM_CAD_SELECOES"
+
+End Sub
+
+Private Sub btn_cadastros_usuarios_Click()
+
+DoCmd.Close acForm, Me.Name
+DoCmd.OpenForm "FRM_CAD_USUARIOS"
+
+End Sub
+
+Private Sub btn_vencedores_Click()
+
+DoCmd.Close acForm, Me.Name
+DoCmd.OpenForm "FRM_CAD_VENCEDORES"
+
+End Sub
+
+Private Sub btn_vis_partidas_Clikc()
+
+DoCmd.Close acForm, Me.Name
+DoCmd.OpenForm "FRM_PARTIDAS"
+
+End Sub
+
+'-- FRM_CAD_USUARIOS
+
+Private Sub btn_salvar_Click()
+
+If Fnc_Validate_Controls(Form_FRM_CAD_USUARIOS) = True Then
+    If Fnc_Save_Fields(Form_FRM_CAD_USUARIOS, "TBL_USUARIOS", False) = True Then
+        MsgBox "Um novo usuário foi cadastrado!",vbInformation,"Atenção"
+        lst_cad_usuarios.Requery
+        Call Fnc_Clear_Fields(Form_FRM_CAD_USUARIOS)
+    End If
+End If
+
+End Sub
+
+Private Sub btn_voltar_Click()
+
+If MsgBox("Você deseja voltar ao menu principal?",vbInformation + vbYesNo) = vbYes Then
+    DoCmd.Close acForm, "FRM_CAD_USUARIOS"
+    DoCmd.OpenForm "FRM_MENU_PRINCIPAL"
+End If
+
+End Sub
+
+Private Sub Form_Load()
+
+Me.txt_usuario = DlookupRecordset("SELECT NOME_USUARIO From TBL_USUARIOS Where LOGIN = '" & Form_FRM_LOGIN.txt_usuario & "'")
+
+End Sub
+
+'-- FRM_CAD_SELECOES
+
+Private Sub btn_salvar_Click() 
+
+If Fnc_Validate_Controls(Form_FRM_CAD_SELECOES) = True Then
+    If Fnc_Save_Fields(Form_FRM_CAD_USUARIOS, "TBL_SELECOES", False) = True Then
+        MsgBox "Um novo usuário foi cadastrado!",vbInformation,"Atenção"
+        lst_cad_selecoes.Requery
+        Call Fnc_Clear_Fields(Form_FRM_CAD_SELECOES)
+    End If
+End If
+
+Private Sub btn_voltar_Click()
+
+If MsgBox ("Você deseja voltar ao menu principal?", vbInformation + vbYesNo) = vbYes Then
+    DoCmd.Close acForm, Me.Name
+    DoCmd.OpenForm "FRM_MENU_PRINCIPAL"
+End If
+
+End Sub
+
+Private Sub Form_Load()
+
+Me.txt_usuario = DlookupRecordset("SELECT NOME_USUARIO From TBL_USUARIOS Where LOGIN = '" & Form_FRM_LOGIN.txt_usuario & "'")
+SIGLA.Setfocus
+
+End Sub    
+
+'-- FRM_APOSTAS
+
+Private Sub btn_salvar_Click()
+
+If txt_usuario = "" Or IsNull(txt_usuario) Then
+    MsgBox "Usuário não identificado!",vbInformation,"Atenção - Cadastro Aposta"
+    Exit Sub
+End If
+
+Set Rs = CurrentDb.OpenRecordset("SELECT * FROM TBL_APOSTA")
+    Rs.AddNew
+        Rs!NOME_USUARIO = txt_usuario.Value
+        Rs!GRUPO_A = "URUGUAI x FRANÇA"
+        Rs!APOSTA_A = txt_01.Value
+        Rs!GRUPO_B = "BELGICA x BRASIL"
+        Rs!APOSTA_B = txt_02.Value
+        Rs!GRUPO_C = "CROACIA x RUSSIA"
+        Rs!APOSTA_C = txt_03.Value
+        Rs!GRUPO_D = "INGLATERRA x SUECIA"
+        Rs!APOSTA_D = txt_04.Value
+    Rs.Update
+Rs.Close
+Set Rs = Nothing
+
+Call Fnc_Clear_Fields(Form_FRM_APOSTAS)
+
+MsgBox "As apostas foram cadastradas com sucesso!",vbInformation,"Atenção - Cadastro Apostas"
+
+End Sub
+
+Private Sub btn_voltar_Click()
+
+If MsgBox ("Você deseja voltar ao menu principal?",vbQuestion + vbYesNo) = vbYes Then
+    DoCmd.Close acForm, Me.Name
+    DoCmd.OpenForm "FRM_MENU_PRINCIPAL"
+End If
+
+End Sub
+
+Private Sub Form_Load()
+
+Me.txt_usuario = DlookupRecordset("SELECT NOME_USUARIO From TBL_USUARIOS WHERE LOGIN = '" & Form_FRM_LOGIN.txt_usuario & "'")
+
+End Sub
+
+'-- FRM_CAD_VENCEDORES
+
+Private Sub Form_Load()
+
+Me.txt_usuario = DlookupRecordset("SELECT NOME_USUARIO FROM TBL_USUARIOS WHERE LOGIN = '" & Form_FRM_LOGIN.txt_usuario & "'")
+
+End Sub
+
+Private Sub btn_voltar_Click()
+
+If MsgBox("Você deseja voltar ao menu principal?",vbQuestion + vbYesNo) = vbYes Then
+    DoCmd.Close acForm, Me.Name
+    DoCmd.OpenForm "FRM_MENU_PRINCIPAL"
+End If
+
+End Sub
+
+Private Sub txt_placar_01_Exit(Cancel As Integer)
+
+vAux = DlookupRecordset("SELECT NOME_USUARIO FROM TBL_APOSTA WHERE APOSTA_A = '" & txt_placar_01 & "'")
+    If vAux <> "" Then
+        txt_vencedor_01 = vAux
+    Else
+        txt_vencedor_01 = "Sem ganhadores"
+    End If
+
+End Sub
+
+Private Sub txt_placar_02_Exit(Cancel As Integer)
+
+vAux = DlookupRecordset("SELECT NOME_USUARIO FROM TBL_APOSTA WHERE APOSTA_B = '" & tt_placar_02 & "'")
+    If vAux <> "" Then
+        txt_vencedor_02 = vAux
+    Else
+        txt_vencedor_02 = "Sem ganhadores"
+    End If
+
+End Sub
+
+Private Sub txt_placar_03_Exit(Cancel As Integer)
+    If vAux <> "" Then
+        txt_vencedor_03 = vAux
+    Else
+        txt_vencedor_03 = "Sem ganhadores"
+    End If
+
+End Sub
+
+Private Sub txt_placar_04_Exit(Cancel As Integer)
+    If vAux <> "" Then
+        txt_vencedor_04 = vAux
+    Else
+        txt_vencedor_04 = "Sem ganhadores"
+    End If
+
+End Sub
